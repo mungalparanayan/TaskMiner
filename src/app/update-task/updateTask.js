@@ -1,0 +1,122 @@
+"use client";
+
+import React, { useEffect, useState } from 'react'
+import loginsvg from '../../assets/login.svg'
+import Image from 'next/image'
+import { addTask, updateTask } from '@/services/taskService';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
+
+const UpdateTask = ({updateTitle, updateContent, updateStatus, deleteTaskUserWithoutPermission, taskIdDelete}) => {
+
+  console.log("I am update title ", taskIdDelete);
+  const [task, setTask] = useState({
+    title: updateTitle,
+    content: updateContent,
+    status: updateStatus,
+  })
+
+  const router = useRouter();
+
+  const handleAddTask = async (event) => {
+    event.preventDefault();
+    // console.log(event.target);
+    console.log(task);
+
+    try {
+      const result = await addTask(task);
+      console.log(result);
+      setTask({
+        title: "", 
+        content: "", 
+        status: ""
+      });
+      deleteTaskUserWithoutPermission(taskIdDelete);
+      router.push('/show-tasks');
+      toast.warning("reload to see changes !!!", {
+        position: "top-right"
+      })
+    }
+    catch(error) {
+      console.log(error);
+      toast.error("Your task is not updated !!", {
+        position: "top-center"
+      })
+    }
+  }
+
+  return (
+    <div className="grid grid-cols-12">
+      <div className="col-span-9 col-start-3 p-5">
+        <div className="my-5 flex justify-center">
+          <Image src={loginsvg} style={{
+            width: "50%"
+          }}
+          alt="Login Banner"/>
+        </div>
+        <h1 className="text-2xl text-center">Update your tasks here</h1>
+
+        <form action="#!" onSubmit={handleAddTask}>
+
+          {/* task title */}
+          <div className="mt-4">
+            <label htmlFor="task_title" className="block text-xl font-medium mb-2">Title</label>
+            <input 
+              type="text"  
+              className="text-xl w-full p-3 rounded-2xl bg-gray-600 focus:ring-gray-400 border border-gray-200" 
+              id="task_title"
+              name="task_title"
+              onChange={(event)=>{
+                setTask({...task, title: event.target.value});
+              }}
+              value={task.title}
+            />
+          </div>
+
+          {/* task content */}
+          <div className="mt-4">
+            <label htmlFor="task_content" className="block text-xl font-medium mb-2">Content</label>
+            <textarea 
+              rows={4} 
+              className="text-xl w-full p-3 rounded-3xl bg-gray-600 focus:ring-gray-400 border border-gray-200" 
+              id="task_content"
+              name="task_content"
+              onChange={(event)=>{
+                setTask({...task, content: event.target.value});
+              }}
+              value={task.content}
+            />
+          </div>
+
+          {/* task status */}
+          <div className="mt-4">
+            <label htmlFor="task_status" className="block text-xl font-medium mb-2">Status</label>
+            <select 
+              id="task_status" 
+              className="text-xl w-full p-3 rounded-2xl bg-gray-600 focus:ring-gray-400 border border-gray-200"
+              name="task_status"
+              onChange={(event)=>{
+                setTask({...task, status: event.target.value});
+              }}
+              value={task.status}
+            >
+              <option value="none" disabled>--- Select Status ---</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+
+          {/* button actions */}
+          <div className="mt-4 flex justify-center">
+            <button className="text-xl bg-blue-600 py-2 px-3 rounded-lg hover:bg-blue-800 mt-4">Update Task</button>
+            <button className="text-xl bg-red-600 py-2 px-3 rounded-lg hover:bg-red-800 ms-3 mt-4">Clear</button>
+          </div>
+
+          {/* {JSON.stringify(task)} */}
+        </form>
+      </div>
+    </div>
+  )
+}
+
+export default UpdateTask
